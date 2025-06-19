@@ -1,0 +1,30 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE_NAME = 'nginxLiron'
+    TAG = "${new Date().format('yyMMddHHmm')}"
+    DOCKERHUB_USERNAME = credentials('dockerhub-username')
+    DOCKERHUB_PASSWORD = credentials('dockerhub-password')
+  }
+
+  stages {
+    stage('Build Docker Image') {
+      steps {
+        sh "docker build -t ${IMAGE_NAME}:${TAG} ."
+      }
+    }
+
+    stage('Login to Docker Hub') {
+      steps {
+        sh "echo ${DOCKERHUB_PASSWORD} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin"
+      }
+    }
+
+    stage('Push to Docker Hub') {
+      steps {
+        sh "docker push ${IMAGE_NAME}:${TAG}"
+      }
+    }
+  }
+}
