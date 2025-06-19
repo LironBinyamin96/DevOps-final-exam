@@ -1,0 +1,36 @@
+---
+- name: Installing packages and creating users
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Ensure net-snmp package is installed
+      package:
+        name: snmp
+        state: present
+
+    - name: Create multiple users
+      user:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - avi
+        - moshe
+        - yoel
+
+    - name: Install nginx package
+      package:
+        name: nginx
+        state: present
+
+    - name: Ensure nginx is running on port 8090
+      become: true
+      lineinfile:
+        path: /etc/nginx/sites-available/default
+        regexp: 'listen 80'
+        line: 'listen 8090'
+    
+    - name: Restart nginx to apply changes
+      service:
+        name: nginx
+        state: restarted
